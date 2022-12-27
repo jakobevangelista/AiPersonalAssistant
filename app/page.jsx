@@ -1,58 +1,64 @@
 "use client";
 import { useState } from 'react';
-import styles from "./page.module.css";
-import Button from '@mui/material/Button';
-import Grid from '@mui/material/Grid'
-import Box from '@mui/material/Box'
-import TextField from '@mui/material/TextField'
-import SendIcon from '@mui/icons-material/Send';
-
+import ChatMessage from './components/ChatMessage';
 
 export default function Home() {
   const [userInput, setUserInput] = useState('');
-  const [finalMessage, setFinalMessage] = useState('');
-  const [result, setResult] = useState();
+  const [chatLog, setChatLog] = useState([{
+    user: 'gpt',
+    message: 'how can i help you?',
+  },{
+    user: 'me',
+    message: 'i want to use chat today',
+  }]);
 
+  function clearChat() {
+    setChatLog([])
+  }
   async function handleSubmit(event) {
-    event.preventDefault();
+    event.preventDefault()
+    let chatLogNew = [...chatLog, {user: 'me', message: `${userInput}`}]
+    setUserInput('')
+    setChatLog(chatLogNew)
+    const messages = chatLogNew.map((message) => message.message).join('\n')
+    console.log(messages)
     const response = await fetch('/api/generate', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ input: userInput }),
+      body: JSON.stringify({ message: messages }),
     });
     const data = await response.json();
-    setResult(data.result);
-    setFinalMessage(userInput)
-    setUserInput('');
+    console.log(userInput)
+    setChatLog([...chatLogNew, {user: 'gpt', message: `${data.message}`}])
   }
 
   return (
-    <div>
-      <h1>AI: {result}</h1>
-      <h2>Me: {finalMessage}</h2>
-      <Grid component="form" noValidate onSubmit={handleSubmit} className={styles.bottomstick} container direction="row" justifyContent="center">
-        <Grid item xs={8}>
-          <TextField 
-              id="outlined-full-width" 
-              label="Ask me anything" 
-              variant="outlined"
-              value={userInput}
+    <>
+      <div class="flex flex-row min-h-screen">
+        {/* sidebar */}
+        <div class='flex flex-col w-[260px] bg-[#202123] h-screen p-2 text-white'>
+          <a class='text-center py-3 px-3 rounded-md hover:bg-gray-500 border border-white cursor-pointer' onClick={clearChat}>New Chat</a>
+        </div>
+        {/* chatbox */}
+        <div class='flex relative flex-col bg-[#343541] w-screen'>
+          {chatLog.map((message, index) => (
+            <ChatMessage key={index} message={message} />
+          ))}
+          {/* input */}
+          <div class='absolute w-full p-3 bottom-0'>
+            <form onSubmit={handleSubmit}>
+              <input class='w-full bg-[#40414f] rounded-md text-white outline-none p-3 text-sm' 
+              rows={1} 
+              value={userInput} 
               onChange={(e) => setUserInput(e.target.value)}
-              fullWidth/>
-        </Grid>
-        <Grid item xs={4}>
-          <Button
-              type="submit"
-              fullWidth
-              size="large"
-              variant="contained"
-              startIcon={<SendIcon />}
-              sx={{ mt: 1, mb: 1 }}
-          >Submit</Button>
-        </Grid>
-      </Grid>
-    </div>
+              placeholder='Ask me anything'>
+              </input>
+            </form>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }

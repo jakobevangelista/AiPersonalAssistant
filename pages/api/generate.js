@@ -6,14 +6,13 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 export default async function (req, res) {
-  const completion = await openai.createCompletion({
+  const { message } = req.body;
+  const response = await openai.createCompletion({
     model: "text-ada-001",
-    prompt: req.body.input,
+    prompt: `${message}`,
     max_tokens: 100,
     n: 1,
-    temperature: 1,
+    temperature: 0.5,
   });
-  const text = completion.data.choices[0].text;
-  console.log(text);
-  res.status(200).json({ result: text });
+  res.status(200).json({ message: response.data.choices[0].text });
 }
