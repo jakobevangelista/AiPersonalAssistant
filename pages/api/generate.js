@@ -8,9 +8,9 @@ const openai = new OpenAIApi(configuration);
 export default async function (req, res) {
   const { message } = req.body;
   const response = await openai.createCompletion({
-    model: "text-ada-001",
+    model: "text-davinci-003",
     prompt: `${message}`,
-    max_tokens: 100,
+    max_tokens: 10,
     n: 1,
     temperature: 0.5,
   });
