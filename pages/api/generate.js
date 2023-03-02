@@ -8,8 +8,11 @@ const openai = new OpenAIApi(configuration);
 export default async function (req, res) {
   const { message } = req.body;
   const response = await openai.createCompletion({
-    model: "text-davinci-003",
-    prompt: `${message}`,
+    model: "text-ada-001",
+    prompt: `You are a bot that is meant to help people out.
+    chatbot: how may I help you today?
+    user: ${message}?
+    chatbot: `,
     max_tokens: 10,
     n: 1,
     temperature: 0.5,
